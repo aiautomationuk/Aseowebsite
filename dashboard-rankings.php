@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/rank-helper.php';
 $client = requireLogin();
 $db     = getDB();
 
@@ -63,7 +64,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $extraNew  = array_slice($current, 1);
                 $db->prepare('UPDATE clients SET keyphrase=?, tracked_keyphrases=?, updated_at=NOW() WHERE id=?')
                    ->execute([$primary, $extraNew ? json_encode($extraNew) : null, $client['id']]);
-                $kpMsg = 'success:Keyphrase added successfully.';
+
+                // Refresh and immediately check ranking for the new keyphrase
+                $s = $db->prepare('SELECT * FROM clients WHERE id = ?');
+                $s->execute([$client['id']]);
+                $client = $s->fetch();
+
+                $position = null;
+                if (!empty($client['website_url'])) {
+                    set_time_limit(60);
+                    $domain   = extractDomain($client['website_url']);
+                    $location = $client['location'] ?? '';
+                    $r        = checkAndSaveRanking($client['id'], $newKp, $domain, $location, $db);
+                    $position = $r['position'];
+                }
+                $posText = $position ? "#$position on Google" : 'Not in top 10 yet';
+                $kpMsg   = "success:Keyphrase added — current position: $posText";
             }
         }
     }

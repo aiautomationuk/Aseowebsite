@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/rank-helper.php';
 $client = requireLogin();
 $db     = getDB();
 
@@ -89,10 +90,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->prepare('UPDATE clients SET keyphrase=?, tracked_keyphrases=?, updated_at=NOW() WHERE id=?')
            ->execute([$primary, $extra ? json_encode($extra) : null, $client['id']]);
 
-        $success = 'Tracked keyphrases saved.';
+        // Refresh client so rank check uses new keyphrases
         $s = $db->prepare('SELECT * FROM clients WHERE id = ?');
         $s->execute([$client['id']]);
         $client = $s->fetch();
+
+        // Immediately check Google rankings for all keyphrases
+        $rankResults = [];
+        if (!empty($client['website_url'])) {
+            set_time_limit(120);
+            $rankResults = checkAllKeyphrasesForClient($client, $db);
+        }
+
+        // Build success message with positions
+        $posLines = [];
+        foreach ($rankResults as $kp => $r) {
+            $pos = $r['position'];
+            $posLines[] = '"' . htmlspecialchars($kp) . '" → ' . ($pos ? "#$pos on Google" : 'Not in top 10');
+        }
+        $success = 'Keyphrases saved' . ($posLines ? ' — rankings checked: ' . implode(', ', $posLines) : '.') ;
         $section = 'keywords';
     }
 

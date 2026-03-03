@@ -29,6 +29,7 @@ if (!$isCli) {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/rank-helper.php';
 
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {
@@ -131,13 +132,10 @@ try {
 
 
 // ══════════════════════════════════════════════════════════════════
-// RANK CHECKING
+// Functions are provided by rank-helper.php
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * Check Google ranking position for a keyphrase via Jina AI search
- * Returns 1-10 (position) or null (not found in top 10)
- */
+if (false) { // kept for reference only — actual functions in rank-helper.php
 function checkRanking(string $keyphrase, string $domain, string $location = ''): ?int
 {
     $jinaKey = $_ENV['JINA_API_KEY'] ?? '';
@@ -205,3 +203,4 @@ function extractDomain(string $url): string
     $host = parse_url(strtolower(trim($url)), PHP_URL_HOST) ?: $url;
     return preg_replace('/^www\./', '', $host);
 }
+} // end if(false)
