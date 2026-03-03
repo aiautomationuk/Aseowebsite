@@ -29,59 +29,93 @@ $searched  = false;
 $error     = '';
 
 if ($keyphrase && $domain) {
-    $searched = true;
-    $jinaKey  = $_ENV['JINA_API_KEY'] ?? '';
-    $query    = urlencode($keyphrase);
-    $url      = "https://s.jina.ai/$query";
-    $headers  = ['Accept: application/json', 'X-Return-Format: json'];
-    if ($jinaKey) $headers[] = "Authorization: Bearer $jinaKey";
+    $searched   = true;
+    $serperKey  = $_ENV['SERPER_API_KEY'] ?? '';
+    $jinaKey    = $_ENV['JINA_API_KEY']   ?? '';
+    $provider   = $serperKey ? 'Google (Serper)' : 'Jina AI';
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HTTPHEADER     => $headers,
-    ]);
-    $response = curl_exec($ch);
-    $curlErr  = curl_error($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    if ($serperKey) {
+        // ── Serper.dev ────────────────────────────────────────────
+        // Auto-detect country
+        $countryCode = 'gb';
+        $locLower = strtolower($client['location'] ?? '');
+        if (str_contains($locLower, 'spain') || str_contains($locLower, 'marbella')
+            || str_contains($locLower, 'madrid') || str_contains($locLower, 'barcelona')) {
+            $countryCode = 'es';
+        } elseif (str_contains($locLower, 'ireland'))   { $countryCode = 'ie'; }
+        elseif (str_contains($locLower, 'australia'))   { $countryCode = 'au'; }
+        elseif (str_contains($locLower, 'usa') || str_contains($locLower, 'united states')) { $countryCode = 'us'; }
 
-    if ($curlErr) {
-        $error = "Connection error: $curlErr";
-    } elseif ($httpCode !== 200) {
-        $error = "Jina returned HTTP $httpCode. Response: " . substr($response, 0, 200);
+        $payload = json_encode(['q' => $keyphrase, 'gl' => $countryCode, 'hl' => 'en', 'num' => 100]);
+        $ch = curl_init('https://google.serper.dev/search');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_HTTPHEADER     => ['X-API-KEY: ' . $serperKey, 'Content-Type: application/json'],
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlErr)           { $error = "Connection error: $curlErr"; }
+        elseif ($httpCode !== 200) { $error = "Serper returned HTTP $httpCode: " . substr($response, 0, 200); }
+        else {
+            $data    = json_decode($response, true);
+            $organic = $data['organic'] ?? [];
+            foreach ($organic as $item) {
+                $itemUrl = $item['link']    ?? '';
+                $isMatch = isDomainMatch($itemUrl, $domain);
+                if ($isMatch && $position === null) $position = (int)($item['position'] ?? 0);
+                $results[] = [
+                    'pos'   => (int)($item['position'] ?? count($results) + 1),
+                    'url'   => $itemUrl,
+                    'title' => $item['title']   ?? '',
+                    'desc'  => mb_substr($item['snippet'] ?? '', 0, 140),
+                    'match' => $isMatch,
+                ];
+                if (count($results) >= 10) break;
+            }
+        }
+
     } else {
-        $data = json_decode($response, true);
-        $raw  = $data['data'] ?? [];
+        // ── Jina fallback ─────────────────────────────────────────
+        $url     = "https://s.jina.ai/" . urlencode($keyphrase);
+        $headers = ['Accept: application/json', 'X-Return-Format: json'];
+        if ($jinaKey) $headers[] = "Authorization: Bearer $jinaKey";
 
-        foreach ($raw as $i => $item) {
-            $itemUrl   = $item['url']   ?? ($item['link'] ?? '');
-            $itemTitle = $item['title'] ?? '';
-            $itemDesc  = $item['description'] ?? ($item['snippet'] ?? '');
-            $isMatch   = isDomainMatch($itemUrl, $domain);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>30,CURLOPT_SSL_VERIFYPEER=>false,CURLOPT_HTTPHEADER=>$headers]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
 
-            if ($isMatch && $position === null) $position = $i + 1;
-
-            $results[] = [
-                'pos'     => $i + 1,
-                'url'     => $itemUrl,
-                'title'   => $itemTitle,
-                'desc'    => mb_substr($itemDesc, 0, 120),
-                'match'   => $isMatch,
-            ];
-            if ($i >= 9) break;
+        if ($curlErr)           { $error = "Connection error: $curlErr"; }
+        elseif ($httpCode !== 200) {
+            $error = "Jina returned HTTP $httpCode — add a SERPER_API_KEY to .env for better results. Response: " . substr($response, 0, 150);
+        } else {
+            $data = json_decode($response, true);
+            foreach ($data['data'] ?? [] as $i => $item) {
+                $itemUrl = $item['url'] ?? ($item['link'] ?? '');
+                $isMatch = isDomainMatch($itemUrl, $domain);
+                if ($isMatch && $position === null) $position = $i + 1;
+                $results[] = ['pos'=>$i+1,'url'=>$itemUrl,'title'=>$item['title']??'','desc'=>mb_substr($item['description']??'',0,140),'match'=>$isMatch];
+                if ($i >= 9) break;
+            }
         }
+    }
 
-        // Save result to rankings table
-        if ($searched && !empty($results)) {
-            $today = date('Y-m-d');
-            $db->prepare('INSERT INTO rankings (client_id, keyphrase, position, checked_at)
-                          VALUES (?,?,?,?)
-                          ON DUPLICATE KEY UPDATE position = VALUES(position)')
-               ->execute([$client['id'], $keyphrase, $position, $today]);
-        }
+    // Save result to rankings table
+    if (!$error && !empty($results)) {
+        $today = date('Y-m-d');
+        $db->prepare('INSERT INTO rankings (client_id, keyphrase, position, checked_at)
+                      VALUES (?,?,?,?)
+                      ON DUPLICATE KEY UPDATE position = VALUES(position)')
+           ->execute([$client['id'], $keyphrase, $position, $today]);
     }
 }
 
@@ -200,9 +234,12 @@ $hasWP     = !empty($client['wp_url']);
     <!-- Raw results -->
     <?php if (!empty($results)): ?>
     <div class="bg-white rounded-2xl border border-slate-100 p-6">
-      <h2 class="text-sm font-extrabold text-slate-700 mb-4">
-        Top <?= count($results) ?> Google results for "<?= htmlspecialchars($keyphrase) ?>"
-      </h2>
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-sm font-extrabold text-slate-700">
+          Top <?= count($results) ?> results for "<?= htmlspecialchars($keyphrase) ?>"
+        </h2>
+        <span class="text-xs text-slate-400 bg-slate-100 px-3 py-1 rounded-full">via <?= htmlspecialchars($provider ?? 'Google') ?></span>
+      </div>
       <div class="space-y-3">
         <?php foreach ($results as $r): ?>
         <div class="flex gap-4 p-4 rounded-xl <?= $r['match'] ? 'bg-emerald-50 border-2 border-emerald-300' : 'bg-slate-50 border border-slate-100' ?>">

@@ -62,13 +62,76 @@ function checkAllKeyphrasesForClient(array $client, PDO $db): array
 }
 
 /**
- * Check Google ranking position for a keyphrase via Jina AI search.
- * Returns 1-10 (position) or null (not found in top 10).
+ * Check Google ranking position for a keyphrase via Serper.dev.
+ * Returns 1-100 (position) or null (not found in top 100).
  */
 function checkRanking(string $keyphrase, string $domain, string $location = ''): ?int
 {
-    $jinaKey = $_ENV['JINA_API_KEY'] ?? '';
+    $serperKey = $_ENV['SERPER_API_KEY'] ?? '';
 
+    if (!$serperKey) {
+        // Fallback to Jina if no Serper key
+        return checkRankingJina($keyphrase, $domain, $location);
+    }
+
+    // Detect country from location — default GB
+    $countryCode = 'gb';
+    $locationLower = strtolower($location);
+    if (str_contains($locationLower, 'spain') || str_contains($locationLower, 'marbella')
+        || str_contains($locationLower, 'madrid') || str_contains($locationLower, 'barcelona')) {
+        $countryCode = 'es';
+    } elseif (str_contains($locationLower, 'usa') || str_contains($locationLower, 'united states')) {
+        $countryCode = 'us';
+    } elseif (str_contains($locationLower, 'ireland')) {
+        $countryCode = 'ie';
+    } elseif (str_contains($locationLower, 'australia')) {
+        $countryCode = 'au';
+    }
+
+    $payload = json_encode([
+        'q'    => $keyphrase,
+        'gl'   => $countryCode,
+        'hl'   => 'en',
+        'num'  => 100,
+    ]);
+
+    $ch = curl_init('https://google.serper.dev/search');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_HTTPHEADER     => [
+            'X-API-KEY: ' . $serperKey,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_SSL_VERIFYPEER => false,
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode !== 200 || !$response) return null;
+
+    $data    = json_decode($response, true);
+    $organic = $data['organic'] ?? [];
+
+    foreach ($organic as $result) {
+        $link = $result['link'] ?? '';
+        if (isDomainMatch($link, $domain)) {
+            return (int)($result['position'] ?? 0) ?: null;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Fallback: Jina AI search (if no Serper key).
+ */
+function checkRankingJina(string $keyphrase, string $domain, string $location = ''): ?int
+{
+    $jinaKey = $_ENV['JINA_API_KEY'] ?? '';
     $query   = $keyphrase . ($location ? ' ' . $location : '');
     $encoded = urlencode($query);
     $url     = "https://s.jina.ai/$encoded";
@@ -84,34 +147,17 @@ function checkRanking(string $keyphrase, string $domain, string $location = ''):
         CURLOPT_HTTPHEADER     => $headers,
     ]);
     $response = curl_exec($ch);
-    $curlErr  = curl_error($ch);
     curl_close($ch);
 
-    if ($curlErr || !$response) return null;
-
+    if (!$response) return null;
     $data    = json_decode($response, true);
     $results = $data['data'] ?? [];
-
-    if (empty($results)) {
-        // Fall back to scanning raw text for domain occurrences
-        $lines = explode("\n", $response);
-        $pos   = 0;
-        foreach ($lines as $line) {
-            if (preg_match('/https?:\/\//i', $line)) {
-                $pos++;
-                if (isDomainMatch($line, $domain)) return $pos;
-                if ($pos >= 10) break;
-            }
-        }
-        return null;
-    }
 
     foreach ($results as $i => $result) {
         $resultUrl = $result['url'] ?? ($result['link'] ?? '');
         if (isDomainMatch($resultUrl, $domain)) return $i + 1;
         if ($i >= 9) break;
     }
-
     return null;
 }
 
