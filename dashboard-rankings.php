@@ -246,9 +246,15 @@ if ($atLimit && isset($upgradePaths[$maxKps])) {
         <h1 class="text-2xl font-extrabold text-slate-900">Google Rankings</h1>
         <p class="text-sm text-slate-400 mt-0.5">Tracked weekly — position 1 is top of Google</p>
       </div>
-      <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-full">
-        <?= htmlspecialchars($tier['label']) ?> · <?= $usedSlots ?>/<?= $maxKps ?> keyphrases
-      </span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <a href="/rank-check-now.php"
+          class="inline-flex items-center gap-1.5 bg-indigo-600 text-white font-bold text-sm px-4 py-2 rounded-full hover:bg-indigo-500 transition active:scale-95">
+          🔍 Manual check
+        </a>
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-full">
+          <?= htmlspecialchars($tier['label']) ?> · <?= $usedSlots ?>/<?= $maxKps ?>
+        </span>
+      </div>
     </div>
 
     <!-- Flash message -->
