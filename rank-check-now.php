@@ -28,7 +28,27 @@ $position  = null;
 $searched  = false;
 $error     = '';
 
-if ($keyphrase && $domain) {
+// ── Weekly limit tracking ─────────────────────────────────────────
+define('WEEKLY_LIMIT', 5);
+
+// Reset counter if a new week has started (rolling 7 days)
+$resetDate = $client['manual_checks_reset'] ?? null;
+$checksUsed = (int)($client['manual_checks_used'] ?? 0);
+
+if (!$resetDate || strtotime($resetDate) < strtotime('-7 days')) {
+    $db->prepare('UPDATE clients SET manual_checks_used = 0, manual_checks_reset = CURDATE() WHERE id = ?')
+       ->execute([$client['id']]);
+    $checksUsed = 0;
+}
+
+$checksRemaining = WEEKLY_LIMIT - $checksUsed;
+$atLimit = ($checksRemaining <= 0);
+
+if ($keyphrase && $domain && $atLimit) {
+    $error = 'limit:You have used all ' . WEEKLY_LIMIT . ' manual searches for this week. Your allowance resets 7 days after your first search.';
+}
+
+if ($keyphrase && $domain && !$atLimit) {
     $searched   = true;
     $serperKey  = $_ENV['SERPER_API_KEY'] ?? '';
     $jinaKey    = $_ENV['JINA_API_KEY']   ?? '';
@@ -109,13 +129,19 @@ if ($keyphrase && $domain) {
         }
     }
 
-    // Save result to rankings table
+    // Save result to rankings table and increment usage counter
     if (!$error && !empty($results)) {
         $today = date('Y-m-d');
         $db->prepare('INSERT INTO rankings (client_id, keyphrase, position, checked_at)
                       VALUES (?,?,?,?)
                       ON DUPLICATE KEY UPDATE position = VALUES(position)')
            ->execute([$client['id'], $keyphrase, $position, $today]);
+
+        $db->prepare('UPDATE clients SET manual_checks_used = manual_checks_used + 1 WHERE id = ?')
+           ->execute([$client['id']]);
+        $checksUsed++;
+        $checksRemaining = WEEKLY_LIMIT - $checksUsed;
+        $atLimit = ($checksRemaining <= 0);
     }
 }
 
@@ -167,32 +193,61 @@ $hasWP     = !empty($client['wp_url']);
   <!-- Main -->
   <main class="flex-1 md:ml-60 p-6 max-w-3xl">
 
-    <div class="flex items-center gap-3 mb-6">
-      <a href="/dashboard-rankings.php" class="text-slate-400 hover:text-indigo-600 transition text-sm font-semibold">← Rankings</a>
-      <span class="text-slate-300">/</span>
-      <h1 class="text-xl font-extrabold text-slate-900">Manual Rank Check</h1>
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <a href="/dashboard-rankings.php" class="text-slate-400 hover:text-indigo-600 transition text-sm font-semibold">← Rankings</a>
+        <span class="text-slate-300">/</span>
+        <h1 class="text-xl font-extrabold text-slate-900">Manual Rank Check</h1>
+      </div>
+
+      <!-- Weekly usage counter -->
+      <div class="flex items-center gap-2">
+        <?php
+          $dotsTotal = WEEKLY_LIMIT;
+          $dotsUsed  = min($checksUsed, $dotsTotal);
+        ?>
+        <?php for ($i = 0; $i < $dotsTotal; $i++): ?>
+          <div class="w-2.5 h-2.5 rounded-full <?= $i < $dotsUsed ? 'bg-rose-400' : 'bg-emerald-400' ?>"></div>
+        <?php endfor; ?>
+        <span class="text-xs font-bold ml-1 <?= $atLimit ? 'text-rose-600' : 'text-slate-500' ?>">
+          <?= $checksRemaining ?>/<?= WEEKLY_LIMIT ?> searches remaining this week
+        </span>
+      </div>
     </div>
 
     <!-- Search form -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-6">
-      <p class="text-sm text-slate-500 mb-4">Search Google (via Jina AI) and see exactly where your site appears in the results.</p>
-      <form method="GET" class="space-y-3">
+    <div class="bg-white rounded-2xl border <?= $atLimit ? 'border-rose-100' : 'border-slate-100' ?> p-6 mb-6">
+      <?php if ($atLimit): ?>
+        <div class="flex items-center gap-3 mb-4 bg-rose-50 border border-rose-200 rounded-xl px-5 py-4">
+          <span class="text-2xl">🚫</span>
+          <div>
+            <p class="font-bold text-rose-700 text-sm">Weekly limit reached</p>
+            <p class="text-xs text-rose-500 mt-0.5">You've used all <?= WEEKLY_LIMIT ?> manual searches for this week. Your allowance resets 7 days after your first search.</p>
+          </div>
+        </div>
+      <?php else: ?>
+        <p class="text-sm text-slate-500 mb-4">Search Google and see exactly where your site appears. <strong><?= $checksRemaining ?></strong> search<?= $checksRemaining !== 1 ? 'es' : '' ?> remaining this week.</p>
+      <?php endif; ?>
+
+      <form method="GET" class="space-y-3 <?= $atLimit ? 'opacity-50 pointer-events-none' : '' ?>">
         <div class="grid md:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-500 mb-1">Keyphrase</label>
             <input type="text" name="kp" value="<?= htmlspecialchars($keyphrase) ?>"
               placeholder='e.g. hair extensions marbella'
-              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required />
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              <?= $atLimit ? 'disabled' : 'required' ?> />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-500 mb-1">Domain to find</label>
             <input type="text" name="domain" value="<?= htmlspecialchars($domain) ?>"
               placeholder='e.g. hairandmakeupmarbella.com'
-              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" required />
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              <?= $atLimit ? 'disabled' : 'required' ?> />
           </div>
         </div>
-        <button type="submit"
-          class="bg-indigo-600 text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-indigo-500 transition active:scale-95">
+        <button type="submit" <?= $atLimit ? 'disabled' : '' ?>
+          class="bg-indigo-600 text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-indigo-500 transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
           🔍 Search Google Now
         </button>
       </form>
