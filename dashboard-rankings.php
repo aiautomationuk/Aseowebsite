@@ -125,12 +125,37 @@ if ($extraJson) {
 $usedSlots = count($trackedKps);
 $atLimit   = ($usedSlots >= $maxKps);
 
-// ── Build 12-week date labels ─────────────────────────────────────
+// ── Build week date labels starting from first check (or today) ──
 $weekLabels = [];
 $weekDates  = [];
-for ($w = 11; $w >= 0; $w--) {
-    $weekLabels[] = date('d M', strtotime("-$w weeks Monday"));
-    $weekDates[]  = date('Y-m-d', strtotime("-$w weeks Monday"));
+
+// Find the earliest ranking check for this client
+try {
+    $firstCheck = $db->prepare('SELECT MIN(checked_at) FROM rankings WHERE client_id = ?');
+    $firstCheck->execute([$client['id']]);
+    $firstDate = $firstCheck->fetchColumn(); // e.g. "2026-03-03" or false
+} catch (Exception $e) {
+    $firstDate = false;
+}
+
+if ($firstDate) {
+    // Start one week before first check, cap history at 26 weeks max
+    $startTs  = strtotime('-1 week Monday', strtotime($firstDate));
+    $todayTs  = strtotime('Monday this week') ?: strtotime('last Monday');
+    $maxWeeks = 26;
+    $weeks    = min($maxWeeks, (int)ceil(($todayTs - $startTs) / (7 * 86400)) + 1);
+    $weeks    = max($weeks, 2); // always at least 2 points
+    for ($w = $weeks - 1; $w >= 0; $w--) {
+        $ts = strtotime("-$w weeks", $todayTs);
+        $weekLabels[] = date('d M', $ts);
+        $weekDates[]  = date('Y-m-d', $ts);
+    }
+} else {
+    // No data yet — just show last 4 weeks so there's a clean empty state
+    for ($w = 3; $w >= 0; $w--) {
+        $weekLabels[] = date('d M', strtotime("-$w weeks Monday"));
+        $weekDates[]  = date('Y-m-d', strtotime("-$w weeks Monday"));
+    }
 }
 
 // ── Fetch ranking history ─────────────────────────────────────────
