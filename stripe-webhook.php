@@ -63,6 +63,37 @@ logWebhook('received', ['type' => $event['type'], 'id' => $event['id'] ?? '']);
 // ── Route events ──────────────────────────────────────────────────
 require_once __DIR__ . '/db.php';
 
+// ── Plan tier lookup by monthly price (in pence) ──────────────────
+function planTierFromAmount(int $pence): array {
+    return match(true) {
+        $pence <=  4900 => ['tier' => 'local_starter',    'kps' => 1],
+        $pence <=  7900 => ['tier' => 'local_growth',     'kps' => 3],
+        $pence <=  9900 => ['tier' => 'national_starter', 'kps' => 1],
+        $pence <= 12900 => ['tier' => 'local_pro',        'kps' => 5],
+        $pence <= 14900 => ['tier' => 'national_growth',  'kps' => 3],
+        $pence <= 24900 => ['tier' => 'national_pro',     'kps' => 5],
+        default         => ['tier' => 'local_starter',    'kps' => 1],
+    };
+}
+
+// ── Derive tier from a Stripe subscription object ─────────────────
+function tierFromSubscription(array $sub): array {
+    $item   = $sub['items']['data'][0] ?? [];
+    $price  = $item['price'] ?? [];
+    $amount = (int)($price['unit_amount'] ?? 0);
+    // Nickname on the price overrides amount-based lookup
+    $nick   = strtolower(trim($price['nickname'] ?? $price['metadata']['plan_tier'] ?? ''));
+    $tierMap = [
+        'local_starter' => ['tier'=>'local_starter','kps'=>1],
+        'local_growth'  => ['tier'=>'local_growth', 'kps'=>3],
+        'local_pro'     => ['tier'=>'local_pro',    'kps'=>5],
+        'national_starter'=>['tier'=>'national_starter','kps'=>1],
+        'national_growth' =>['tier'=>'national_growth', 'kps'=>3],
+        'national_pro'  => ['tier'=>'national_pro', 'kps'=>5],
+    ];
+    return $tierMap[$nick] ?? planTierFromAmount($amount);
+}
+
 try {
     $db = getDB();
 
@@ -70,39 +101,46 @@ try {
 
         // ── Payment completed (Payment Link or one-time checkout) ──
         case 'checkout.session.completed':
-            $session      = $event['data']['object'];
-            $email        = strtolower(trim($session['customer_details']['email'] ?? $session['customer_email'] ?? ''));
-            $customerId   = $session['customer']     ?? null;
+            $session        = $event['data']['object'];
+            $email          = strtolower(trim($session['customer_details']['email'] ?? $session['customer_email'] ?? ''));
+            $customerId     = $session['customer']     ?? null;
             $subscriptionId = $session['subscription'] ?? null;
-            $amountTotal  = $session['amount_total'] ?? 0; // in pence
+            $amountTotal    = (int)($session['amount_total'] ?? 0);
 
             if (!$email) {
                 logWebhook('checkout_no_email', $session);
                 break;
             }
 
-            // Find client by email
             $stmt = $db->prepare('SELECT id, plan FROM clients WHERE email = ?');
             $stmt->execute([$email]);
             $client = $stmt->fetch();
 
             if (!$client) {
-                // Client not in DB yet — log it and do nothing (they may not have signed up)
                 logWebhook('checkout_no_client', ['email' => $email]);
                 break;
             }
 
-            // Update plan to active + store Stripe IDs
-            $db->prepare('UPDATE clients SET plan = "active", stripe_customer_id = ?, stripe_subscription_id = ?, updated_at = NOW() WHERE id = ?')
-               ->execute([$customerId, $subscriptionId, $client['id']]);
+            // Derive plan tier from amount paid
+            $tierInfo = planTierFromAmount($amountTotal);
+
+            $db->prepare('UPDATE clients SET
+                    plan = "active",
+                    plan_tier = ?,
+                    max_keyphrases = ?,
+                    stripe_customer_id = ?,
+                    stripe_subscription_id = ?,
+                    updated_at = NOW()
+                  WHERE id = ?')
+               ->execute([$tierInfo['tier'], $tierInfo['kps'], $customerId, $subscriptionId, $client['id']]);
 
             logWebhook('plan_activated', [
                 'email'  => $email,
                 'amount' => $amountTotal,
-                'plan'   => 'active',
+                'tier'   => $tierInfo['tier'],
+                'kps'    => $tierInfo['kps'],
             ]);
 
-            // Send a "you're in!" confirmation email to the client
             sendActivationEmail($email, $db, $client['id']);
             break;
 
@@ -115,10 +153,28 @@ try {
 
             if (!$custId) break;
 
-            $newPlan = in_array($status, ['active', 'trialing']) ? 'active' : 'cancelled';
+            $cancelAtEnd = (bool)($sub['cancel_at_period_end'] ?? false);
 
-            $db->prepare('UPDATE clients SET plan = ?, stripe_subscription_id = ?, updated_at = NOW() WHERE stripe_customer_id = ?')
-               ->execute([$newPlan, $subId, $custId]);
+            if ($cancelAtEnd) {
+                $newPlan = 'cancelling';
+                $db->prepare('UPDATE clients SET plan = ?, plan_tier = "cancelling", stripe_subscription_id = ?, updated_at = NOW() WHERE stripe_customer_id = ?')
+                   ->execute([$newPlan, $subId, $custId]);
+            } elseif (in_array($status, ['active', 'trialing'])) {
+                $tierInfo = tierFromSubscription($sub);
+                $db->prepare('UPDATE clients SET
+                        plan = "active",
+                        plan_tier = ?,
+                        max_keyphrases = ?,
+                        stripe_subscription_id = ?,
+                        updated_at = NOW()
+                      WHERE stripe_customer_id = ?')
+                   ->execute([$tierInfo['tier'], $tierInfo['kps'], $subId, $custId]);
+                $newPlan = $tierInfo['tier'];
+            } else {
+                $newPlan = 'cancelled';
+                $db->prepare('UPDATE clients SET plan = "cancelled", plan_tier = "cancelled", stripe_subscription_id = ?, updated_at = NOW() WHERE stripe_customer_id = ?')
+                   ->execute([$subId, $custId]);
+            }
 
             logWebhook('subscription_updated', ['stripe_status' => $status, 'plan' => $newPlan, 'customer' => $custId]);
             break;
@@ -130,7 +186,7 @@ try {
 
             if (!$custId) break;
 
-            $db->prepare('UPDATE clients SET plan = "cancelled", updated_at = NOW() WHERE stripe_customer_id = ?')
+            $db->prepare('UPDATE clients SET plan = "cancelled", plan_tier = "cancelled", updated_at = NOW() WHERE stripe_customer_id = ?')
                ->execute([$custId]);
 
             logWebhook('subscription_cancelled', ['customer' => $custId]);

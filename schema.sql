@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS articles (
     image_url      VARCHAR(500) DEFAULT NULL,
     wp_post_id     INT DEFAULT NULL,
     wp_post_url    VARCHAR(500) DEFAULT NULL,
+    wp_post_id     INT DEFAULT NULL,
+    wp_post_url    VARCHAR(500) DEFAULT NULL,
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     published_at   TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
@@ -61,6 +63,8 @@ CREATE TABLE IF NOT EXISTS articles (
 -- ALTER TABLE articles
 --   ADD COLUMN scheduled_date DATE DEFAULT NULL AFTER meta_desc,
 --   ADD COLUMN approved_at DATETIME DEFAULT NULL AFTER scheduled_date,
+--   ADD COLUMN wp_post_id INT DEFAULT NULL AFTER image_url,
+--   ADD COLUMN wp_post_url VARCHAR(500) DEFAULT NULL AFTER wp_post_id;
 --   MODIFY COLUMN status ENUM('draft','approved','published','failed') DEFAULT 'draft';
 
 CREATE TABLE IF NOT EXISTS keyphrases (

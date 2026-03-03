@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/wp-publish.php';
 
 startSecureSession();
 if (empty($_SESSION['client_id'])) {
@@ -69,9 +70,46 @@ try {
         echo json_encode(['success' => true, 'message' => '✓ Changes saved']);
 
     } elseif ($action === 'approve') {
+        // Mark as approved first
         $db->prepare('UPDATE articles SET status = "approved", approved_at = NOW() WHERE id = ?')
            ->execute([$id]);
-        echo json_encode(['success' => true, 'message' => '✓ Article approved and queued for publishing']);
+
+        // Fetch full client record to check WordPress credentials
+        $clientStmt = $db->prepare('SELECT * FROM clients WHERE id = ?');
+        $clientStmt->execute([$_SESSION['client_id']]);
+        $fullClient = $clientStmt->fetch();
+
+        if (!empty($fullClient['wp_url']) && !empty($fullClient['wp_username']) && !empty($fullClient['wp_app_password'])) {
+            // WordPress connected — publish now
+            $result = publishToWordPress($id, $fullClient);
+            if ($result['ok']) {
+                $msg = $result['scheduled']
+                    ? '✓ Article approved and scheduled on WordPress'
+                    : '✓ Article approved and published live on WordPress';
+                echo json_encode([
+                    'success'    => true,
+                    'message'    => $msg,
+                    'wp_post_id' => $result['wp_post_id'],
+                    'wp_url'     => $result['wp_url'],
+                    'published'  => true,
+                ]);
+            } else {
+                // WP publish failed — article stays approved, show warning
+                echo json_encode([
+                    'success'   => true,
+                    'message'   => '✓ Article approved — WordPress publish failed: ' . $result['error'],
+                    'wp_error'  => $result['error'],
+                    'published' => false,
+                ]);
+            }
+        } else {
+            // No WordPress — just approved, cron will handle publishing later
+            echo json_encode([
+                'success'   => true,
+                'message'   => '✓ Article approved and queued for publishing',
+                'published' => false,
+            ]);
+        }
 
     } elseif ($action === 'reject') {
         $db->prepare('UPDATE articles SET status = "draft", approved_at = NULL WHERE id = ?')
