@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Your Account — Auto-Seo.co.uk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    @keyframes fade-in-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fade-in-up .5s ease forwards; }
+    .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+    .btn-gradient:hover { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+
+  <!-- Step progress bar at top -->
+  <div class="fixed top-0 left-0 right-0 h-1 bg-slate-100 z-50">
+    <div class="h-1 bg-indigo-500" style="width:100%"></div>
+  </div>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col items-center justify-center px-4 py-20">
+    <div class="w-full max-w-lg fade-in">
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <a href="index.html" class="inline-flex items-center gap-2 mb-6">
+          <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
+          <span class="font-extrabold text-slate-900">Auto-Seo<span class="text-indigo-500">.co.uk</span></span>
+        </a>
+
+        <!-- Step indicators -->
+        <div class="flex items-center justify-center gap-2 mb-8">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-bold">✓</div>
+            <div class="w-8 h-0.5 bg-emerald-400"></div>
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-bold">✓</div>
+            <div class="w-8 h-0.5 bg-emerald-400"></div>
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-bold">✓</div>
+            <div class="w-8 h-0.5 bg-emerald-400"></div>
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-bold">✓</div>
+            <div class="w-8 h-0.5 bg-indigo-300"></div>
+            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold ring-4 ring-indigo-100">5</div>
+          </div>
+        </div>
+
+        <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Complete Your Account</h1>
+      </div>
+
+      <!-- Card -->
+      <div id="signup-card" class="bg-white rounded-3xl shadow-lg border border-slate-100 p-8 space-y-6">
+
+        <div class="text-center">
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Almost Done!</h2>
+          <p class="text-slate-500 text-sm leading-relaxed">Enter your details to create your account and access your personalised SEO content calendar.</p>
+        </div>
+
+        <!-- Name fields -->
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1.5">
+              <span class="w-6 h-6 rounded-md bg-indigo-500 flex items-center justify-center text-white text-xs">👤</span>
+              First Name
+            </label>
+            <input id="first-name" type="text" placeholder="Jane"
+              class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+          </div>
+          <div>
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1.5">
+              <span class="w-6 h-6 rounded-md bg-indigo-500 flex items-center justify-center text-white text-xs">👤</span>
+              Last Name
+            </label>
+            <input id="last-name" type="text" placeholder="Smith"
+              class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1.5">
+            <span class="w-6 h-6 rounded-md bg-indigo-500 flex items-center justify-center text-white text-xs">✉</span>
+            Email Address
+          </label>
+          <input id="email-input" type="email" placeholder="jane@yourcompany.co.uk"
+            class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+        </div>
+
+        <!-- Phone (optional) -->
+        <div>
+          <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-1.5">
+            <span class="w-6 h-6 rounded-md bg-slate-400 flex items-center justify-center text-white text-xs">📞</span>
+            Phone <span class="text-xs text-slate-400 font-normal">(optional)</span>
+          </label>
+          <input id="phone-input" type="tel" placeholder="+44 7700 000000"
+            class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
+        </div>
+
+        <!-- Terms -->
+        <label class="flex items-start gap-3 cursor-pointer group">
+          <input id="terms-check" type="checkbox"
+            class="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600" />
+          <span class="text-sm text-slate-500">I agree to the <a href="#" class="text-indigo-600 underline font-medium">Terms of Service</a> and <a href="#" class="text-indigo-600 underline font-medium">Privacy Policy</a></span>
+        </label>
+
+        <!-- Error -->
+        <p id="error-msg" class="hidden text-sm text-rose-600 font-medium"></p>
+
+        <!-- CTA button -->
+        <button onclick="handleSubmit()" id="submit-btn"
+          class="btn-gradient w-full py-4 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-200">
+          Create My Account &amp; Get Started
+          <span class="text-lg">›</span>
+        </button>
+
+        <!-- Trust note -->
+        <div class="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 flex items-start gap-3">
+          <span class="text-indigo-500 mt-0.5 text-lg">🔒</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">Secure &amp; Private</p>
+            <p class="text-xs text-slate-500 mt-0.5">Your details are never shared. We'll use your email to send your personalised SEO plan.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Success card (hidden initially) -->
+      <div id="success-card" class="hidden bg-white rounded-3xl shadow-lg border border-slate-100 p-10 text-center space-y-5">
+        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-3xl">✓</div>
+        <h2 class="text-2xl font-bold text-slate-900">You're in!</h2>
+        <p class="text-slate-500 text-sm">Thanks <strong id="confirm-name" class="text-slate-800"></strong> — your details are saved. Now choose your plan to unlock your full SEO strategy.</p>
+        <button onclick="window.location.href='trial.html'"
+          class="btn-gradient w-full py-4 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-200">
+          See Your Free Trial Offer →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex items-center justify-between">
+    <a href="competitors.html" class="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition">
+      ‹ Back
+    </a>
+    <div class="flex items-center gap-2 text-sm font-semibold text-indigo-600">
+      <span class="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs">✓</span>
+      Step 5: Complete Your Account
+    </div>
+    <button onclick="handleSubmit()" id="bottom-btn"
+      class="btn-gradient text-white font-bold px-5 py-2.5 rounded-full text-sm flex items-center gap-2 transition active:scale-95 cursor-pointer shadow-md shadow-indigo-200">
+      Create My Account <span>✓</span>
+    </button>
+  </div>
+
+  <script>
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+    function hideError() {
+      document.getElementById('error-msg').classList.add('hidden');
+    }
+
+    async function handleSubmit() {
+      hideError();
+      const firstName = document.getElementById('first-name').value.trim();
+      const lastName  = document.getElementById('last-name').value.trim();
+      const email     = document.getElementById('email-input').value.trim();
+      const phone     = document.getElementById('phone-input').value.trim();
+      const accepted  = document.getElementById('terms-check').checked;
+
+      if (!firstName) { showError('Please enter your first name.'); return; }
+      if (!email || !email.includes('@')) { showError('Please enter a valid email address.'); return; }
+      if (!accepted) { showError('Please accept the Terms of Service and Privacy Policy.'); return; }
+
+      const btn       = document.getElementById('submit-btn');
+      const bottomBtn = document.getElementById('bottom-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      bottomBtn.disabled = true;
+
+      // Save details to sessionStorage — signup.php is called on the next page
+      sessionStorage.setItem('user_email',      email);
+      sessionStorage.setItem('user_first_name', firstName);
+      sessionStorage.setItem('user_last_name',  lastName);
+      sessionStorage.setItem('user_phone',      phone);
+
+      // Go straight to the loading/creating page
+      window.location.href = 'account-created.html';
+    }
+
+    document.getElementById('email-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSubmit();
+    });
+  </script>
+</body>
+</html>

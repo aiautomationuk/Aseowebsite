@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started — Auto-Seo.co.uk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .plan-card { transition: transform .2s, box-shadow .2s; }
+    .plan-card:hover { transform: translateY(-4px); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <div class="fixed top-0 left-0 right-0 h-1 bg-slate-100 z-50">
+    <div class="h-1 bg-indigo-500" style="width:20%"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="bg-white border-b border-slate-100 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
+        <span class="font-extrabold text-slate-900">Auto-Seo<span class="text-indigo-500">.co.uk</span></span>
+      </a>
+      <a href="competitors.html" class="text-sm text-slate-500 hover:text-slate-700 transition">← Back</a>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-6 py-16 space-y-12">
+
+    <!-- Header -->
+    <div class="text-center space-y-4">
+      <div id="scan-badge" class="hidden inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+        ✓ Your website has been scanned
+      </div>
+      <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900">Choose your plan to unlock your SEO roadmap</h1>
+      <p class="text-lg text-slate-500 max-w-2xl mx-auto">Your scan is ready. Choose a plan below to access your full SEO strategy, competitor analysis, and automated content calendar.</p>
+    </div>
+
+    <!-- Scan teaser -->
+    <div id="scan-teaser" class="hidden rounded-2xl border border-indigo-100 bg-indigo-50 p-6 max-w-2xl mx-auto">
+      <p class="text-xs font-bold uppercase tracking-wide text-indigo-400 mb-2">Your scan result</p>
+      <p id="teaser-summary" class="text-slate-700 text-sm leading-relaxed mb-4"></p>
+      <div id="teaser-keywords" class="flex flex-wrap gap-2"></div>
+      <div class="mt-4 pt-4 border-t border-indigo-100 flex items-center gap-2 text-sm text-indigo-600 font-semibold">
+        <span>🔒</span> Full competitor list and content strategy unlocked after payment
+      </div>
+    </div>
+
+    <!-- Pricing cards -->
+    <div class="grid md:grid-cols-3 gap-8 items-center">
+
+      <!-- Starter -->
+      <div class="plan-card bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Starter</h3>
+        <div class="flex items-baseline gap-1 mb-3">
+          <span class="text-4xl font-extrabold text-slate-900">£77</span>
+          <span class="text-slate-400 text-sm">/mo</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-6">Perfect for small businesses and personal sites.</p>
+        <ul class="space-y-3 mb-8 flex-grow text-sm text-slate-700">
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> 25 AI Articles / month</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Basic backlink building</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Weekly SEO audit</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> 1 website</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Email support</li>
+        </ul>
+        <button onclick="checkout('starter')"
+          class="w-full py-3.5 rounded-full font-bold text-sm bg-slate-100 text-slate-900 hover:bg-slate-200 transition active:scale-95 cursor-pointer">
+          Get Started
+        </button>
+      </div>
+
+      <!-- Professional (popular) -->
+      <div class="plan-card bg-white rounded-3xl border-2 border-indigo-500 shadow-xl p-8 flex flex-col relative scale-105">
+        <span class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest">Most Popular</span>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Professional</h3>
+        <div class="flex items-baseline gap-1 mb-3">
+          <span class="text-4xl font-extrabold text-slate-900">£149</span>
+          <span class="text-slate-400 text-sm">/mo</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-6">Best for growing businesses and agencies.</p>
+        <ul class="space-y-3 mb-8 flex-grow text-sm text-slate-700">
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> 50 AI Articles / month</li>
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> Advanced backlink building</li>
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> Daily SEO audit</li>
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> 3 websites</li>
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> Priority support</li>
+          <li class="flex items-center gap-2"><span class="text-indigo-500 font-bold">✓</span> Competitor analysis</li>
+        </ul>
+        <button onclick="checkout('professional')"
+          class="w-full py-3.5 rounded-full font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-500 transition active:scale-95 cursor-pointer">
+          Get Started
+        </button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="plan-card bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Enterprise</h3>
+        <div class="flex items-baseline gap-1 mb-3">
+          <span class="text-4xl font-extrabold text-slate-900">£499</span>
+          <span class="text-slate-400 text-sm">/mo</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-6">For agencies and large-scale operations.</p>
+        <ul class="space-y-3 mb-8 flex-grow text-sm text-slate-700">
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Unlimited AI Articles</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Premium PR backlinks</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Real-time monitoring</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Unlimited websites</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> Dedicated account manager</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓</span> API access</li>
+        </ul>
+        <button onclick="checkout('enterprise')"
+          class="w-full py-3.5 rounded-full font-bold text-sm bg-slate-100 text-slate-900 hover:bg-slate-200 transition active:scale-95 cursor-pointer">
+          Contact Sales
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Trust signals -->
+    <div class="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-400">
+      <div class="flex items-center gap-2"><span class="text-emerald-500">🔒</span> Secure payment via Stripe</div>
+      <div class="flex items-center gap-2"><span class="text-emerald-500">↩</span> Cancel anytime</div>
+      <div class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 14-day money-back guarantee</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Show scan teaser if we have data
+    const summary = sessionStorage.getItem('scan_summary');
+    const offersRaw = sessionStorage.getItem('scan_offers');
+
+    if (summary) {
+      document.getElementById('scan-badge').classList.remove('hidden');
+      document.getElementById('scan-teaser').classList.remove('hidden');
+      document.getElementById('teaser-summary').textContent = summary;
+    }
+
+    if (offersRaw) {
+      try {
+        const offers = JSON.parse(offersRaw);
+        const kwEl = document.getElementById('teaser-keywords');
+        kwEl.innerHTML = offers.slice(0, 4).map(o =>
+          `<span class="px-3 py-1 bg-white border border-indigo-200 text-indigo-600 rounded-full text-xs font-semibold">${o.label}</span>`
+        ).join('') + '<span class="px-3 py-1 bg-white border border-indigo-200 text-slate-400 rounded-full text-xs font-semibold">+ more locked 🔒</span>';
+      } catch {}
+    }
+
+    // Payment links — set these in your Stripe dashboard and paste below
+    // OR load them from the server via payment-config.php
+    const PAYMENT_LINKS = {
+      starter:      'https://buy.stripe.com/YOUR_STARTER_LINK',
+      professional: 'https://buy.stripe.com/YOUR_PROFESSIONAL_LINK',
+      enterprise:   'mailto:hello@auto-seo.co.uk?subject=Enterprise%20Enquiry',
+    };
+
+    function checkout(plan) {
+      // Store chosen plan
+      sessionStorage.setItem('chosen_plan', plan);
+
+      if (plan === 'enterprise') {
+        window.location.href = PAYMENT_LINKS.enterprise;
+        return;
+      }
+
+      // Redirect to Stripe Payment Link
+      // Stripe will append ?session_id={CHECKOUT_SESSION_ID} on success
+      window.location.href = PAYMENT_LINKS[plan];
+    }
+  </script>
+</body>
+</html>

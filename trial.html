@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Free Trial — Auto-Seo.co.uk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+    .btn-gradient:hover { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+    @keyframes pulse-ring { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .pulse { animation: pulse-ring 2s ease-in-out infinite; }
+
+    /* Success toast overlay */
+    #success-toast {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      transition: opacity 0.6s ease;
+    }
+    #success-toast.fade-out { opacity: 0; pointer-events: none; }
+    .toast-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 44px 48px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+      transform: scale(1);
+      animation: toast-pop 0.5s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes toast-pop { 0%{transform:scale(.6);opacity:0} 100%{transform:scale(1);opacity:1} }
+    .tick-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+      font-size: 2.2rem;
+      color: #fff;
+    }
+    .toast-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .toast-sub { font-size: 0.9rem; color: #64748b; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- Top bar -->
+  <nav class="bg-white border-b border-slate-100 px-6 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">⚡</div>
+      <span class="font-extrabold text-slate-900">Auto-Seo<span class="text-indigo-500">.co.uk</span></span>
+    </a>
+    <div class="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-600 text-sm font-bold px-4 py-1.5 rounded-full pulse">
+      ⏱ Offer expires in <span id="countdown" class="tabular-nums">9:59</span>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-start">
+
+      <!-- Left: value prop -->
+      <div class="space-y-6">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
+            Get 3 SEO articles in 5 minutes for
+            <span id="brand-name-display" class="text-indigo-600 block mt-1"></span>
+          </h1>
+          <p class="mt-3 text-base text-slate-500">Plus a 30-day content plan based on your search terms</p>
+        </div>
+
+        <!-- What's included -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 text-lg">📄</div>
+              <div>
+                <div class="text-sm font-bold text-slate-900">3 SEO Articles</div>
+                <div class="text-xs text-slate-400">Hero images &amp; infographics included</div>
+              </div>
+            </div>
+            <span class="text-emerald-500 font-bold text-lg">✓</span>
+          </div>
+
+          <div class="flex items-center justify-between bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 text-lg">📅</div>
+              <div>
+                <div class="text-sm font-bold text-slate-900">30-Day Content Plan</div>
+                <div class="text-xs text-slate-400">Based on your winning search terms</div>
+              </div>
+            </div>
+            <span class="text-emerald-500 font-bold text-lg">✓</span>
+          </div>
+
+          <div class="flex items-center justify-between bg-white rounded-xl border border-slate-100 shadow-sm px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 text-lg">⚡</div>
+              <div>
+                <div class="text-sm font-bold text-slate-900">Auto-Publish</div>
+                <div class="text-xs text-slate-400">WordPress, Shopify, Webflow, API. Set up once, publish automatically</div>
+              </div>
+            </div>
+            <span class="text-emerald-500 font-bold text-lg">✓</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 text-center">
+            <div class="text-2xl font-extrabold text-indigo-600">847+</div>
+            <div class="text-xs text-slate-500 mt-1">Sites</div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 text-center">
+            <div class="text-2xl font-extrabold text-indigo-600">12K+</div>
+            <div class="text-xs text-slate-500 mt-1">Articles</div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 text-center">
+            <div class="text-2xl font-extrabold text-amber-500">4.9★</div>
+            <div class="text-xs text-slate-500 mt-1">Rating</div>
+          </div>
+        </div>
+
+        <!-- Testimonial -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-start gap-4">
+          <img src="https://picsum.photos/seed/testimonial/80/80" alt="" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+          <div>
+            <p class="text-sm text-slate-700 italic">"Content-wise the articles are good, with accurate info and nice formatting. Actually very impressive."</p>
+            <p class="mt-2 text-xs font-bold text-slate-500">Alexandra Truta · MiniCRM.io · Copywriter</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: pricing card -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-8 space-y-5 sticky top-6">
+
+        <div class="text-center">
+          <p class="text-sm text-slate-400 font-medium mb-1">3-day full access trial</p>
+          <div class="flex items-baseline justify-center gap-2">
+            <span class="text-6xl font-extrabold text-slate-900">£1</span>
+            <div class="text-left">
+              <div class="text-slate-400 line-through text-sm">£119/month</div>
+              <div class="text-xs text-slate-400">then £119/mo</div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">No contracts, no setup fees</p>
+        </div>
+
+        <!-- CTA -->
+        <a id="stripe-link" href="https://buy.stripe.com/YOUR_TRIAL_LINK" target="_blank"
+          class="btn-gradient w-full py-4 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-200 no-underline">
+          Get 3 articles for £1 now →
+        </a>
+
+        <div class="text-center">
+          <a href="payment.html" class="text-sm text-slate-400 hover:text-slate-600 transition underline">Skip for now</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-emerald-700 font-semibold justify-center">
+          <span class="text-emerald-500">✓</span> Cancel anytime. No questions asked.
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 text-center text-sm text-emerald-700 font-semibold">
+          You don't like it? We'll refund the £1 in 24 hours
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 space-y-2">
+          <p class="text-xs text-slate-500 text-center">Don't pay £5,000/mo for SEO agencies. <strong class="text-slate-700">It's just £119/month.</strong></p>
+          <ul class="space-y-1.5 text-xs text-slate-600">
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 30 articles/month</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> 3–7 backlinks/month, total of 100 DA</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Ongoing search term research</li>
+          </ul>
+        </div>
+
+        <!-- Stripe badge -->
+        <div class="flex flex-col items-center gap-2 pt-2">
+          <span class="text-xs text-slate-300 font-semibold tracking-widest uppercase">stripe</span>
+          <div class="flex items-center gap-2">
+            <div class="bg-slate-100 rounded px-2 py-1 text-xs font-bold text-blue-600">VISA</div>
+            <div class="bg-slate-100 rounded px-2 py-1 text-xs font-bold text-red-500">MC</div>
+            <div class="bg-slate-100 rounded px-2 py-1 text-xs font-bold text-slate-600">AMEX</div>
+            <div class="bg-slate-100 rounded px-2 py-1 text-xs font-bold text-blue-700">PayPal</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Account created celebration overlay -->
+  <div id="success-toast">
+    <div class="toast-card">
+      <div class="tick-circle">✓</div>
+      <div class="toast-title">Account Created!</div>
+      <div class="toast-sub">Your SEO profile is ready. Here's your exclusive offer...</div>
+    </div>
+  </div>
+
+  <script>
+    // Fire confetti then fade out the overlay
+    (function() {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.45 },
+        colors: ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'],
+      });
+      // Second burst for extra effect
+      setTimeout(() => {
+        confetti({ particleCount: 60, spread: 120, origin: { y: 0.4 }, startVelocity: 30 });
+      }, 400);
+
+      setTimeout(() => {
+        const toast = document.getElementById('success-toast');
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 650);
+      }, 2200);
+    })();
+
+    // Personalise with brand name
+    const brand = sessionStorage.getItem('scan_brand') || sessionStorage.getItem('user_first_name') || 'Your Business';
+    document.getElementById('brand-name-display').textContent = brand;
+
+    // Countdown timer — 10 minutes
+    let seconds = 10 * 60 - 1;
+    function updateCountdown() {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      document.getElementById('countdown').textContent = m + ':' + String(s).padStart(2, '0');
+      if (seconds > 0) {
+        seconds--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        document.getElementById('countdown').textContent = '0:00';
+      }
+    }
+    updateCountdown();
+  </script>
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto-Seo.co.uk — AI-Powered SEO Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            'primary-focus': '#4f46e5',
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .btn-primary { display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#6366f1;color:#fff;font-weight:700;padding:12px 24px;border-radius:9999px;border:none;cursor:pointer;transition:all .2s; }
+    .btn-primary:hover { background:#4f46e5; }
+    .btn-primary:active { transform:scale(0.95); }
+    .btn-secondary { display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#0f172a;font-weight:700;padding:12px 24px;border-radius:9999px;border:1px solid #e2e8f0;cursor:pointer;transition:all .2s; }
+    .btn-secondary:hover { background:#f8fafc; }
+    .btn-secondary:active { transform:scale(0.95); }
+    .glass { background:rgba(255,255,255,.8);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.3); }
+    @keyframes float-up { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes float-down { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    @keyframes fade-in-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .float-up { animation:float-up 4s ease-in-out infinite; }
+    .float-down { animation:float-down 5s ease-in-out infinite; }
+    .spinner { animation:spin 1s linear infinite; }
+    .fade-in-up { animation:fade-in-up .6s ease forwards; }
+    .progress-bar { transition:width .5s ease; }
+    .faq-answer { max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease; }
+    .faq-answer.open { max-height:300px; }
+    #navbar.scrolled { background:rgba(255,255,255,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.3);box-shadow:0 1px 3px rgba(0,0,0,.05); }
+    .scan-result { display:none; }
+    .scan-result.visible { display:block;animation:fade-in-up .4s ease forwards; }
+    /* API key modal */
+    #api-modal { display:none; }
+    #api-modal.open { display:flex; }
+  </style>
+</head>
+<body class="bg-white text-slate-900 min-h-screen selection:bg-indigo-100 selection:text-indigo-700">
+
+
+  <!-- Navbar -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-5">
+    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+          <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
+        </div>
+        <span class="text-xl font-extrabold tracking-tight text-slate-900">Auto-Seo<span class="text-primary">.co.uk</span></span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#features" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Features</a>
+        <a href="#how-it-works" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">How it Works</a>
+        <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Pricing</a>
+        <a href="#faq" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">FAQ</a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-4">
+        <button class="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Login</button>
+        <button class="btn-primary py-2 px-5 text-sm">Get Started</button>
+      </div>
+
+      <button id="mobile-toggle" class="md:hidden text-slate-900" onclick="toggleMobileMenu()">
+        <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="md:hidden bg-white border-t border-slate-100 overflow-hidden" style="max-height:0;transition:max-height .3s ease;">
+      <div class="flex flex-col p-6 gap-4">
+        <a href="#features" class="text-lg font-medium text-slate-600" onclick="closeMobileMenu()">Features</a>
+        <a href="#how-it-works" class="text-lg font-medium text-slate-600" onclick="closeMobileMenu()">How it Works</a>
+        <a href="#pricing" class="text-lg font-medium text-slate-600" onclick="closeMobileMenu()">Pricing</a>
+        <a href="#faq" class="text-lg font-medium text-slate-600" onclick="closeMobileMenu()">FAQ</a>
+        <hr class="border-slate-100" />
+        <button class="text-lg font-semibold text-slate-600 text-left">Login</button>
+        <button class="btn-primary w-full">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-7xl mx-auto px-6 text-center fade-in-up">
+
+      <!-- Social proof -->
+      <div class="flex flex-col items-center mb-8">
+        <div class="flex items-center gap-4">
+          <div class="flex -space-x-3">
+            <img class="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://picsum.photos/seed/user1/100/100" alt="" />
+            <img class="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://picsum.photos/seed/user2/100/100" alt="" />
+            <img class="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://picsum.photos/seed/user3/100/100" alt="" />
+            <img class="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://picsum.photos/seed/user4/100/100" alt="" />
+            <img class="w-10 h-10 rounded-full border-2 border-white object-cover" src="https://picsum.photos/seed/user5/100/100" alt="" />
+          </div>
+          <div class="flex flex-col items-start">
+            <div class="flex gap-0.5 text-amber-400 text-base">★★★★★</div>
+            <p class="text-sm font-bold text-slate-700">100k+ Articles Created</p>
+          </div>
+        </div>
+      </div>
+
+      <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-primary text-xs font-bold uppercase tracking-wider mb-6">
+        ★ AI-Powered SEO Automation
+      </span>
+
+      <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-8">
+        Grow Organic Traffic <br />
+        <span class="text-primary">With Auto-Seo.co.uk</span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        Get traffic and outrank competitors with AI-optimised content, backlink building, and technical SEO while you sleep.
+      </p>
+
+      <!-- Scan Form -->
+      <div class="max-w-2xl mx-auto mb-10">
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm text-left">
+          <form id="scan-form" onsubmit="handleScan(event)" class="space-y-3">
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <div class="flex w-full items-center rounded-lg border-2 border-rose-500 bg-white px-3 py-3 text-sm text-slate-500 focus-within:ring-2 focus-within:ring-rose-200" style="box-shadow:0 0 0 1px rgba(244,63,94,0.8);">
+                <span class="mr-1 select-none text-slate-400 text-sm">https://</span>
+                <input id="url-input" type="text" class="w-full bg-transparent text-sm text-slate-900 outline-none" placeholder="yourwebsite.com" required />
+              </div>
+              <button type="submit" id="scan-btn" class="btn-primary py-3 px-6 text-sm whitespace-nowrap">
+                Start scan →
+              </button>
+            </div>
+            <p id="scan-hint" class="text-xs text-slate-500">We will handle the technical setup. Just give us your URL.</p>
+          </form>
+
+          <!-- Progress -->
+          <div id="scan-progress" class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 hidden">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-full border border-slate-200 bg-white flex items-center justify-center">
+                <div class="spinner w-5 h-5 rounded-full border-2 border-slate-300 border-t-slate-900"></div>
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-slate-900">Scanning website</div>
+                <div id="progress-label" class="text-xs text-slate-500">Preparing scan</div>
+              </div>
+            </div>
+            <div class="mt-4 h-2 w-full rounded-full bg-slate-100">
+              <div id="progress-bar" class="h-2 rounded-full bg-slate-900 progress-bar" style="width:0%"></div>
+            </div>
+            <div id="progress-pct" class="mt-2 text-xs text-slate-500">0% complete</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scan Result -->
+      <div id="scan-result" class="scan-result max-w-3xl mx-auto mt-8 p-8 bg-white rounded-3xl border border-indigo-200 shadow-2xl text-left relative overflow-hidden mb-10">
+        <div class="absolute top-0 right-0 p-4 opacity-10 text-primary">
+          <i data-lucide="zap" class="w-20 h-20 fill-current"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-500"></i>
+          AI Analysis Complete
+        </h3>
+        <div class="space-y-6 relative z-10">
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-widest text-primary mb-2">Business Summary</h4>
+            <p id="result-summary" class="text-slate-700 leading-relaxed"></p>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Recommended Keywords</h4>
+            <div id="result-keywords" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div id="result-services-wrap">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Top Services Detected</h4>
+            <div id="result-services" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div id="result-competitors-wrap">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Main Competitors</h4>
+            <div id="result-competitors" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <p class="text-sm text-slate-500 italic">Ready to rank for these? Start your trial today.</p>
+            <button class="text-primary font-bold text-sm hover:underline">Download Full Report</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
+        <button class="btn-primary w-full sm:w-auto px-8 py-4 text-lg">Start Free Trial →</button>
+        <button class="btn-secondary w-full sm:w-auto px-8 py-4 text-lg">Book a Demo</button>
+      </div>
+
+      <!-- Google Sign In -->
+      <div class="mt-8 flex justify-center">
+        <button class="flex items-center gap-3 px-8 py-4 rounded-full border-[3px] border-indigo-200 bg-white hover:bg-slate-50 transition-all active:scale-95">
+          <svg class="w-6 h-6" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span class="text-xl font-bold text-slate-900">Join with Google</span>
+        </button>
+      </div>
+
+      <!-- Press logos -->
+      <div class="mt-12 flex items-center justify-center gap-8 opacity-40 grayscale">
+        <span class="font-bold text-xl tracking-tighter">TECHCRUNCH</span>
+        <span class="font-bold text-xl tracking-tighter">FORBES</span>
+        <span class="font-bold text-xl tracking-tighter">WIRED</span>
+        <span class="font-bold text-xl tracking-tighter">VERGE</span>
+      </div>
+
+      <!-- GSC Chart Preview -->
+      <div class="mt-20 relative max-w-5xl mx-auto">
+        <div class="rounded-2xl border border-slate-200 shadow-2xl overflow-hidden bg-white">
+          <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="flex gap-1.5">
+                <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+              </div>
+              <div class="h-4 w-px bg-slate-200 mx-2"></div>
+              <div class="flex items-center gap-2 text-slate-500 font-medium text-sm">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span>Search Console</span>
+              </div>
+            </div>
+            <div class="bg-white rounded-md px-3 py-1 text-[10px] text-slate-400 font-mono border border-slate-200 shadow-sm">app.auto-seo.co.uk/performance</div>
+          </div>
+          <div class="p-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div class="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Total Clicks</p>
+                <p class="text-2xl font-extrabold text-blue-900">5.1K</p>
+                <div class="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-1">↑ +142%</div>
+              </div>
+              <div class="p-4 rounded-xl bg-purple-50 border border-purple-100">
+                <p class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Impressions</p>
+                <p class="text-2xl font-extrabold text-purple-900">48K</p>
+                <div class="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-1">↑ +86%</div>
+              </div>
+              <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Avg. CTR</p>
+                <p class="text-2xl font-extrabold text-emerald-900">10.6%</p>
+                <div class="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-1">↑ +12%</div>
+              </div>
+              <div class="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                <p class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Avg. Position</p>
+                <p class="text-2xl font-extrabold text-amber-900">2.4</p>
+                <div class="flex items-center gap-1 text-emerald-600 text-xs font-bold mt-1">↑ +4.2</div>
+              </div>
+            </div>
+            <div class="h-[300px]">
+              <canvas id="gsc-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating badges -->
+        <div class="absolute -bottom-10 -left-10 hidden lg:block float-up">
+          <div class="bg-white p-4 rounded-xl shadow-xl border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+              <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">Organic Traffic</p>
+              <p class="text-xl font-bold text-slate-900">+142%</p>
+            </div>
+          </div>
+        </div>
+        <div class="absolute -top-10 -right-10 hidden lg:block float-down">
+          <div class="bg-white p-4 rounded-xl shadow-xl border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-indigo-100 text-primary rounded-lg flex items-center justify-center">
+              <i data-lucide="search" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">Keywords Ranked</p>
+              <p class="text-xl font-bold text-slate-900">2,480</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-20">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">Everything you need to dominate search</h2>
+        <p class="text-lg text-slate-600">Our all-in-one platform automates the most tedious parts of SEO so you can focus on growing your business.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="cpu" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">AI Content Engine</h3>
+          <p class="text-slate-600 leading-relaxed">Generate high-quality, SEO-optimised articles that rank for competitive keywords automatically.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="globe" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Auto-Backlinks</h3>
+          <p class="text-slate-600 leading-relaxed">Our system automatically identifies and secures high-authority backlinks to boost your domain rating.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="bar-chart-3" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Real-time Analytics</h3>
+          <p class="text-slate-600 leading-relaxed">Track your rankings, traffic, and conversions in real-time with our intuitive dashboard.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="shield-check" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Technical SEO Audit</h3>
+          <p class="text-slate-600 leading-relaxed">Continuous monitoring and fixing of technical issues like broken links, slow speeds, and crawl errors.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="layers" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Competitor Tracking</h3>
+          <p class="text-slate-600 leading-relaxed">Monitor your competitors' strategies and outrank them by identifying their keyword gaps.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
+          <div class="mb-6 text-primary"><i data-lucide="clock" class="w-8 h-8"></i></div>
+          <h3 class="text-xl font-bold text-slate-900 mb-4">24/7 Automation</h3>
+          <p class="text-slate-600 leading-relaxed">SEO never sleeps. Our AI works around the clock to ensure your site stays at the top of SERPs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="py-24">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="relative order-2 lg:order-1 flex justify-center">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+            alt="SEO Dashboard" class="w-full h-auto drop-shadow-2xl rounded-3xl hover:scale-105 transition-transform duration-700" />
+          <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 max-w-[240px] z-10">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+              <span class="text-sm font-bold text-slate-900">Optimisation Complete</span>
+            </div>
+            <p class="text-xs text-slate-500">12 new articles published and 4 high-quality backlinks secured today.</p>
+          </div>
+        </div>
+        <div class="order-1 lg:order-2">
+          <h2 class="text-4xl font-bold text-slate-900 mb-8 leading-tight">How Auto-Seo puts your growth on auto-pilot 🚀</h2>
+          <div class="space-y-10">
+            <div class="flex gap-6">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl">01</div>
+              <div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Connect Your Site</h3>
+                <p class="text-slate-600 leading-relaxed">Integrate your website and Google Search Console in seconds. Our AI starts analysing your current performance immediately.</p>
+              </div>
+            </div>
+            <div class="flex gap-6">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl">02</div>
+              <div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">AI Strategy Generation</h3>
+                <p class="text-slate-600 leading-relaxed">Auto-Seo identifies the high-impact keywords your competitors are ranking for and creates a custom growth roadmap.</p>
+              </div>
+            </div>
+            <div class="flex gap-6">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl">03</div>
+              <div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Automated Execution</h3>
+                <p class="text-slate-600 leading-relaxed">Sit back as our AI generates content, builds backlinks, and optimises your site structure daily to drive results.</p>
+              </div>
+            </div>
+          </div>
+          <button class="mt-12 btn-primary">Get Started Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="py-24">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="bg-primary rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div class="absolute bottom-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-8 relative z-10">Ready to outrank your competitors?</h2>
+        <p class="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto relative z-10">
+          Join 1,000+ companies using Auto-Seo to grow their organic traffic on auto-pilot.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+          <button class="bg-white text-primary px-10 py-5 rounded-full font-bold text-lg hover:bg-slate-50 transition-all hover:shadow-xl active:scale-95 cursor-pointer">Start Your Free Trial</button>
+          <button class="bg-indigo-800 text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-indigo-900 transition-all active:scale-95 cursor-pointer">Talk to an Expert</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-20">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">Simple, transparent pricing</h2>
+        <p class="text-lg text-slate-600">Choose the plan that fits your growth ambitions. No hidden fees.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8 items-center">
+        <div class="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Starter</h3>
+          <div class="flex items-baseline gap-1 mb-4"><span class="text-4xl font-extrabold text-slate-900">£77</span><span class="text-slate-500">/mo</span></div>
+          <p class="text-sm text-slate-600 mb-8">Perfect for small blogs and personal sites.</p>
+          <ul class="space-y-4 mb-10 flex-grow">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">25 AI Articles / month</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Basic Backlink Building</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Weekly SEO Audit</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">1 Website</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Email Support</span></li>
+          </ul>
+          <button class="w-full py-4 rounded-full font-bold bg-slate-100 text-slate-900 hover:bg-slate-200 transition-all cursor-pointer">Start Free Trial</button>
+        </div>
+        <div class="bg-white p-10 rounded-3xl border-2 border-primary shadow-xl scale-105 z-10 relative flex flex-col">
+          <span class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest">Most Popular</span>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Professional</h3>
+          <div class="flex items-baseline gap-1 mb-4"><span class="text-4xl font-extrabold text-slate-900">£149</span><span class="text-slate-500">/mo</span></div>
+          <p class="text-sm text-slate-600 mb-8">Best for growing businesses and startups.</p>
+          <ul class="space-y-4 mb-10 flex-grow">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">50 AI Articles / month</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Advanced Backlink Building</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Daily SEO Audit</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">3 Websites</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Priority Support</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Competitor Analysis</span></li>
+          </ul>
+          <button class="w-full py-4 rounded-full font-bold bg-primary text-white hover:bg-primary-focus transition-all cursor-pointer">Start Free Trial</button>
+        </div>
+        <div class="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Enterprise</h3>
+          <div class="flex items-baseline gap-1 mb-4"><span class="text-4xl font-extrabold text-slate-900">£499</span><span class="text-slate-500">/mo</span></div>
+          <p class="text-sm text-slate-600 mb-8">For agencies and large scale operations.</p>
+          <ul class="space-y-4 mb-10 flex-grow">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Unlimited AI Articles</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Premium PR Backlinks</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Real-time Monitoring</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Unlimited Websites</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">Dedicated Account Manager</span></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-primary flex-shrink-0"></i><span class="text-sm text-slate-700">API Access</span></li>
+          </ul>
+          <button class="w-full py-4 rounded-full font-bold bg-slate-100 text-slate-900 hover:bg-slate-200 transition-all cursor-pointer">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-24">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-4xl font-bold text-slate-900 mb-12 text-center">Frequently Asked Questions</h2>
+      <div class="space-y-4" id="faq-list"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-12 mb-16">
+        <div class="col-span-2">
+          <div class="flex items-center gap-2 mb-6">
+            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+              <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
+            </div>
+            <span class="text-xl font-extrabold tracking-tight text-white">Auto-Seo<span class="text-primary">.co.uk</span></span>
+          </div>
+          <p class="max-w-sm mb-8">The world's first fully autonomous SEO platform. We help businesses grow their organic presence without the manual grind.</p>
+          <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer"><i data-lucide="globe" class="w-4 h-4"></i></div>
+            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer"><i data-lucide="bar-chart-3" class="w-4 h-4"></i></div>
+            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer"><i data-lucide="zap" class="w-4 h-4"></i></div>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Product</h4>
+          <ul class="space-y-4 text-sm">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Case Studies</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Reviews</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Company</h4>
+          <ul class="space-y-4 text-sm">
+            <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+        <p>© 2026 Auto-Seo.co.uk. All rights reserved.</p>
+        <p>Built with ❤️ for search dominance.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Lucide icons ──────────────────────────────────────────────
+    lucide.createIcons();
+
+    // ── Navbar scroll effect ──────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // ── Mobile menu ───────────────────────────────────────────────
+    let mobileOpen = false;
+    function toggleMobileMenu() {
+      mobileOpen = !mobileOpen;
+      const menu = document.getElementById('mobile-menu');
+      menu.style.maxHeight = mobileOpen ? menu.scrollHeight + 'px' : '0';
+      document.getElementById('menu-icon').setAttribute('data-lucide', mobileOpen ? 'x' : 'menu');
+      lucide.createIcons();
+    }
+    function closeMobileMenu() {
+      mobileOpen = false;
+      document.getElementById('mobile-menu').style.maxHeight = '0';
+      document.getElementById('menu-icon').setAttribute('data-lucide', 'menu');
+      lucide.createIcons();
+    }
+
+    // ── GSC Chart ─────────────────────────────────────────────────
+    const gscData = {
+      labels: ['Jan 1','Jan 5','Jan 10','Jan 15','Jan 20','Jan 25','Feb 1','Feb 5','Feb 10','Feb 15','Feb 20','Feb 25','Mar 1'],
+      clicks:      [120, 180, 250, 420, 580, 890, 1200, 1500, 2100, 2800, 3400, 4200, 5100],
+      impressions: [1200, 1800, 2400, 3800, 5200, 7800, 11000, 14500, 19800, 26500, 32000, 39500, 48000],
+    };
+    new Chart(document.getElementById('gsc-chart'), {
+      type: 'line',
+      data: {
+        labels: gscData.labels,
+        datasets: [
+          {
+            label: 'Clicks',
+            data: gscData.clicks,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.08)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+          },
+          {
+            label: 'Impressions',
+            data: gscData.impressions,
+            borderColor: '#a855f7',
+            backgroundColor: 'rgba(168,85,247,0.08)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 12 } } },
+          y: { display: false }
+        },
+        animation: { duration: 2000 }
+      }
+    });
+
+    // ── FAQ ───────────────────────────────────────────────────────
+    const faqs = [
+      { q: 'How does the AI write the content?', a: 'Our AI uses advanced language models trained specifically on high-ranking SEO content. It analyses top-performing pages for your target keywords and generates unique, high-quality articles that match search intent.' },
+      { q: 'Is the content safe from Google penalties?', a: "Yes. We focus on 'Helpful Content' guidelines. Our AI doesn't just spin text; it researches and structures information to provide genuine value, which is exactly what Google's algorithms look for." },
+      { q: 'How long until I see results?', a: 'SEO is a long-term game, but our automated approach accelerates the process. Most clients see significant ranking improvements and traffic growth within 45–90 days of consistent automation.' },
+      { q: 'Can I connect multiple websites?', a: 'Absolutely. Depending on your plan, you can manage multiple domains from a single dashboard, each with its own custom SEO strategy and content calendar.' },
+    ];
+    const faqList = document.getElementById('faq-list');
+    faqs.forEach((faq, i) => {
+      faqList.innerHTML += `
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <button onclick="toggleFaq(${i})" class="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-slate-50 transition-colors">
+            <span class="font-bold text-slate-900">${faq.q}</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform faq-icon-${i}"></i>
+          </button>
+          <div id="faq-${i}" class="faq-answer">
+            <div class="px-6 pb-5 text-slate-600 leading-relaxed">${faq.a}</div>
+          </div>
+        </div>`;
+    });
+    lucide.createIcons();
+    toggleFaq(0); // open first by default
+
+    function toggleFaq(i) {
+      faqs.forEach((_, j) => {
+        const el = document.getElementById(`faq-${j}`);
+        const icon = document.querySelector(`.faq-icon-${j}`);
+        if (j === i) {
+          el.classList.toggle('open');
+          if (icon) icon.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
+        } else {
+          el.classList.remove('open');
+          if (icon) icon.style.transform = '';
+        }
+      });
+    }
+
+    // ── Scan logic ────────────────────────────────────────────────
+    let scanTimer = null;
+
+    function setProgress(pct, label) {
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-pct').textContent = Math.round(pct) + '% complete';
+      if (label) document.getElementById('progress-label').textContent = label;
+    }
+
+    async function handleScan(e) {
+      e.preventDefault();
+
+      const rawUrl = document.getElementById('url-input').value.trim();
+
+      // Clear all previous scan data
+      ['scan_offers','scan_competitors','scan_summary','scan_keyphrase',
+       'scan_brand','scan_location','scan_service_area','business_info',
+       'scan_priority','chosen_plan','scan_url'].forEach(k => sessionStorage.removeItem(k));
+
+      // Reset UI
+      document.getElementById('scan-result').classList.remove('visible');
+      document.getElementById('scan-hint').textContent = 'We will handle the technical setup. Just give us your URL.';
+      document.getElementById('scan-btn').disabled = true;
+      document.getElementById('scan-btn').textContent = 'Scanning...';
+      document.getElementById('url-input').disabled = true;
+      document.getElementById('scan-progress').classList.remove('hidden');
+      setProgress(10, 'Connecting to the website');
+
+      // Animate progress
+      let pct = 10;
+      scanTimer = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 12, 90);
+        setProgress(pct);
+      }, 700);
+
+      try {
+        setProgress(pct, 'Analysing with AI…');
+
+        const res = await fetch('scan.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: rawUrl })
+        });
+
+        const result = await res.json();
+        if (!res.ok || result.error) throw new Error(result.error || 'Scan failed. Please try again.');
+
+        clearInterval(scanTimer);
+        setProgress(100, 'Scan complete');
+
+        // Render result
+        document.getElementById('result-summary').textContent = result.summary || '';
+
+        const kwEl = document.getElementById('result-keywords');
+        kwEl.innerHTML = (result.keywords || []).map(kw =>
+          `<span class="px-4 py-2 bg-indigo-50 text-primary rounded-full text-sm font-semibold border border-indigo-100">${kw}</span>`
+        ).join('');
+
+        const svEl = document.getElementById('result-services');
+        const svWrap = document.getElementById('result-services-wrap');
+        if (result.services?.length) {
+          svEl.innerHTML = result.services.map(s =>
+            `<span class="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-semibold border border-emerald-100">${s}</span>`
+          ).join('');
+          svWrap.style.display = '';
+        } else {
+          svWrap.style.display = 'none';
+        }
+
+        const cpEl = document.getElementById('result-competitors');
+        const cpWrap = document.getElementById('result-competitors-wrap');
+        if (result.competitors?.length) {
+          cpEl.innerHTML = result.competitors.map(c =>
+            `<a href="${c.url}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-slate-50 text-slate-700 rounded-full text-sm font-semibold border border-slate-200 hover:border-indigo-300 hover:text-primary transition-colors">${c.name}</a>`
+          ).join('');
+          cpWrap.style.display = '';
+        } else {
+          cpWrap.style.display = 'none';
+        }
+
+        // Store and redirect immediately
+        sessionStorage.setItem('scan_offers', JSON.stringify(
+          (result.services || result.keywords || []).slice(0, 6).map((s, i) => ({
+            id: 'offer-' + (i + 1), label: s, order: i + 1
+          }))
+        ));
+        sessionStorage.setItem('scan_competitors', JSON.stringify(
+          (result.competitors || []).map(c => ({ name: c.name, url: c.url }))
+        ));
+        sessionStorage.setItem('scan_summary', result.summary || '');
+        sessionStorage.setItem('scan_keyphrase', result.primary_keyphrase || '');
+        sessionStorage.setItem('scan_brand', result.brand_name || '');
+        sessionStorage.setItem('scan_location', result.location || '');
+        sessionStorage.setItem('scan_service_area', result.service_area || '');
+        sessionStorage.setItem('scan_url', rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl);
+        window.location.href = 'offers.html';
+
+      } catch (err) {
+        clearInterval(scanTimer);
+        setProgress(0, '');
+        document.getElementById('scan-hint').innerHTML = `<span class="text-rose-600">${err.message || 'Failed to scan. Please try again.'}</span>`;
+      } finally {
+        document.getElementById('scan-progress').classList.add('hidden');
+        document.getElementById('scan-btn').disabled = false;
+        document.getElementById('scan-btn').textContent = 'Start scan →';
+        document.getElementById('url-input').disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

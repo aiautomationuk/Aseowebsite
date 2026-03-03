@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Priority — Auto-Seo.co.uk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }</style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <div class="fixed top-0 left-0 right-0 h-1 bg-slate-100 z-50">
+    <div class="h-1 bg-indigo-500" style="width:50%"></div>
+  </div>
+
+  <div class="min-h-screen px-4 py-16 sm:px-6">
+    <div class="mx-auto max-w-2xl space-y-6">
+
+      <div class="text-center">
+        <a href="index.html" class="inline-flex items-center gap-2 mb-6">
+          <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">A</div>
+          <span class="font-extrabold text-slate-900">Auto-Seo<span class="text-indigo-500">.co.uk</span></span>
+        </a>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Step 3 of 5</p>
+        <h1 class="text-4xl font-bold text-slate-900">Which offering first?</h1>
+        <p class="mt-2 text-base text-slate-500">Choose one offering as your top SEO priority. We'll focus content here first.</p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div id="priority-list" class="space-y-3"></div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <a href="offers.html" class="text-sm font-medium text-slate-500 hover:text-slate-700 transition">← Back</a>
+          <button onclick="goNext()" id="next-btn" disabled
+            class="inline-flex items-center gap-2 bg-indigo-600 text-white font-bold px-6 py-3 rounded-full hover:bg-indigo-500 transition active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+            Next →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let offers = [];
+    let selectedId = '';
+
+    function load() {
+      const raw = sessionStorage.getItem('scan_offers');
+      if (raw) {
+        try { offers = JSON.parse(raw); } catch { offers = []; }
+      }
+      const saved = sessionStorage.getItem('scan_priority');
+      selectedId = saved || (offers[0]?.id || '');
+      render();
+    }
+
+    function render() {
+      const list = document.getElementById('priority-list');
+      if (!offers.length) {
+        list.innerHTML = '<p class="text-sm text-slate-400">No offerings found. <a href="offers.html" class="underline">Go back and add some.</a></p>';
+        return;
+      }
+      list.innerHTML = offers.map((offer, i) => {
+        const sel = offer.id === selectedId;
+        return `
+          <button onclick="select('${offer.id}')"
+            class="w-full rounded-xl border px-5 py-4 text-left transition ${sel ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40'}">
+            <div class="flex items-center gap-4">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold flex-shrink-0 ${sel ? 'bg-emerald-600 text-white' : 'border border-emerald-300 text-emerald-700'}">
+                ${i + 1}
+              </div>
+              <div>
+                <div class="text-base font-semibold text-slate-900">${escHtml(offer.label)}</div>
+                ${sel ? '<div class="text-xs text-emerald-700 mt-0.5">★ Highest priority</div>' : ''}
+              </div>
+            </div>
+          </button>`;
+      }).join('');
+      document.getElementById('next-btn').disabled = !selectedId;
+    }
+
+    function select(id) {
+      selectedId = id;
+      sessionStorage.setItem('scan_priority', id);
+      render();
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function goNext() {
+      window.location.href = 'process.html';
+    }
+
+    load();
+  </script>
+</body>
+</html>

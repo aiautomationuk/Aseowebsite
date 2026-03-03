@@ -1,0 +1,22 @@
+# Environment variables — never commit these
+.env
+.env.*
+
+# Node / build dependencies
+node_modules/
+.vite/
+dist/
+.next/
+
+# Logs
+cron_log.txt
+article_log.txt
+webhook_log.txt
+error_log
+
+# Uploaded images
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
